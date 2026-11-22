@@ -63,36 +63,16 @@ function addRemoveButtonsListeners() {
 
 updateUsernameField();
 renderSelectedCollaborateurs();
-<<<<<<< HEAD
-if (dropdownBtn) {
-  dropdownBtn.addEventListener("click", () => {
-    dropdownList.classList.toggle("active");
-=======
 addRemoveButtonsListeners();
 
-// Ouvre ou ferme la liste deroulante.
-dropdownBtn.addEventListener("click", () => {
-  dropdownList.classList.toggle("active");
-});
-
-// Ajoute un collaborateur quand on clique sur une entree du menu.
-// Le test includes empeche les doublons dans la selection.
-items.forEach(item => {
-  item.addEventListener("click", () => {
-    const name = (item.getAttribute("data-name") || item.textContent).trim();
-
-    if (!selectedCollaborateurs.includes(name)) {
-      selectedCollaborateurs.push(name);
-    }
-
-    updateUsernameField();
-
-    renderSelectedCollaborateurs();
-
-    dropdownList.classList.remove("active");
->>>>>>> b4694e3fc501fc670a7f5668b9481273415c08c0
+if (dropdownBtn) {
+  // Ouvre ou ferme la liste deroulante.
+  dropdownBtn.addEventListener("click", () => {
+    dropdownList.classList.toggle("active");
   });
 
+  // Ajoute un collaborateur quand on clique sur une entree du menu.
+  // Le test includes empeche les doublons dans la selection.
   collabItems.forEach(item => {
     item.addEventListener("click", () => {
       const name = (item.getAttribute("data-name") || item.textContent).trim();
@@ -104,6 +84,7 @@ items.forEach(item => {
       updateUsernameField();
 
       renderSelectedCollaborateurs();
+      addRemoveButtonsListeners();
 
       dropdownList.classList.remove("active");
     });

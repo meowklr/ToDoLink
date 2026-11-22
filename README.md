@@ -1,58 +1,94 @@
-<p align="center"><a href="https://laravel.com" target="_blank"><img src="https://raw.githubusercontent.com/laravel/art/master/logo-lockup/5%20SVG/2%20CMYK/1%20Full%20Color/laravel-logolockup-cmyk-red.svg" width="400" alt="Laravel Logo"></a></p>
+# ToDoLink
 
-<p align="center">
-<a href="https://github.com/laravel/framework/actions"><img src="https://github.com/laravel/framework/workflows/tests/badge.svg" alt="Build Status"></a>
-<a href="https://packagist.org/packages/laravel/framework"><img src="https://img.shields.io/packagist/dt/laravel/framework" alt="Total Downloads"></a>
-<a href="https://packagist.org/packages/laravel/framework"><img src="https://img.shields.io/packagist/v/laravel/framework" alt="Latest Stable Version"></a>
-<a href="https://packagist.org/packages/laravel/framework"><img src="https://img.shields.io/packagist/l/laravel/framework" alt="License"></a>
-</p>
+Application web de gestion de tâches réalisée avec Laravel. Elle permet de suivre des tâches sur un tableau de bord, d'en créer avec une date limite, une priorité, des collaborateurs et une pièce jointe, et d'envoyer les échéances vers un scénario Make.com.
 
-## About Laravel
+## Fonctionnalités
 
-Laravel is a web application framework with expressive, elegant syntax. We believe development must be an enjoyable and creative experience to be truly fulfilling. Laravel takes the pain out of development by easing common tasks used in many web projects, such as:
+L'application repose sur trois vues principales :
+- une page d'accueil (`/`) avec accès à l'espace utilisateur
+- un tableau de bord (`/dashboard`) affichant les tâches triées par date limite, avec téléchargement des pièces jointes (`/tasks/{task}/download`)
+- un formulaire d'ajout de tâche (`/task-add` ou `/tasks/create`) gérant le titre, la description, la date limite, la priorité (`Haute`, `Moyenne`, `Basse`), la sélection de collaborateurs et l'envoi d'un fichier (10 Mo maximum, stocké dans `storage/app/tasks`)
 
-- [Simple, fast routing engine](https://laravel.com/docs/routing).
-- [Powerful dependency injection container](https://laravel.com/docs/container).
-- Multiple back-ends for [session](https://laravel.com/docs/session) and [cache](https://laravel.com/docs/cache) storage.
-- Expressive, intuitive [database ORM](https://laravel.com/docs/eloquent).
-- Database agnostic [schema migrations](https://laravel.com/docs/migrations).
-- [Robust background job processing](https://laravel.com/docs/queues).
-- [Real-time event broadcasting](https://laravel.com/docs/broadcasting).
+L'authentification (inscription, connexion, gestion du profil) est assurée par Laravel Breeze. Lors de la création d'une tâche, `App\Services\CalendarService` peut également envoyer un appel HTTP POST vers un webhook Make.com pour créer un événement de calendrier.
 
-Laravel is accessible, powerful, and provides tools required for large, robust applications.
+## Stack technique
 
-## Learning Laravel
+Backend : PHP 8.3+, Laravel 13, Laravel Breeze.
+Frontend : vues Blade, CSS (`public/style.css`) et JavaScript (`public/task_add.js`, `public/account_menu.js`), avec Vite 8, Tailwind CSS et Alpine.js configurés dans `package.json`.
+Base de données : SQLite par défaut (configurable dans `.env`).
+Tests et formatage : Pest 4, PHPUnit, Laravel Pint.
 
-Laravel has the most extensive and thorough [documentation](https://laravel.com/docs) and video tutorial library of all modern web application frameworks, making it a breeze to get started with the framework.
+## Prérequis
 
-In addition, [Laracasts](https://laracasts.com) contains thousands of video tutorials on a range of topics including Laravel, modern PHP, unit testing, and JavaScript. Boost your skills by digging into our comprehensive video library.
+- PHP 8.3 ou supérieur (avec les extensions requises par Laravel, dont `pdo_sqlite` pour SQLite)
+- Composer
+- Node.js et npm
 
-You can also watch bite-sized lessons with real-world projects on [Laravel Learn](https://laravel.com/learn), where you will be guided through building a Laravel application from scratch while learning PHP fundamentals.
+## Installation et lancement
 
-## Agentic Development
-
-Laravel's predictable structure and conventions make it ideal for AI coding agents like Claude Code, Cursor, and GitHub Copilot. Install [Laravel Boost](https://laravel.com/docs/ai) to supercharge your AI workflow:
+1. Cloner le dépôt et installer les dépendances :
 
 ```bash
-composer require laravel/boost --dev
-
-php artisan boost:install
+composer install
+npm install
 ```
 
-Boost provides your agent 15+ tools and skills that help agents build Laravel applications while following best practices.
+2. Créer le fichier d'environnement et générer la clé d'application :
 
-## Contributing
+```bash
+cp .env.example .env
+php artisan key:generate
+```
 
-Thank you for considering contributing to the Laravel framework! The contribution guide can be found in the [Laravel documentation](https://laravel.com/docs/contributions).
+Sous Windows (Invite de commandes), utiliser `copy .env.example .env`.
 
-## Code of Conduct
+3. Préparer la base de données SQLite et exécuter les migrations :
 
-In order to ensure that the Laravel community is welcoming to all, please review and abide by the [Code of Conduct](https://laravel.com/docs/contributions#code-of-conduct).
+```bash
+touch database/database.sqlite
+php artisan migrate
+```
 
-## Security Vulnerabilities
+4. Compiler les assets et démarrer le serveur local :
 
-If you discover a security vulnerability within Laravel, please send an e-mail to Taylor Otwell via [taylor@laravel.com](mailto:taylor@laravel.com). All security vulnerabilities will be promptly addressed.
+```bash
+npm run build
+php artisan serve
+```
 
-## License
+Le script `composer run setup` automatise ces étapes. Pour le développement, `composer run dev` lance en parallèle le serveur Laravel, le worker de file d'attente, les logs Pail et Vite.
 
-The Laravel framework is open-sourced software licensed under the [MIT license](https://opensource.org/licenses/MIT).
+### Webhook Make.com (optionnel)
+
+Pour activer la création d'événements calendrier à l'ajout d'une tâche, ajouter la variable suivante dans `.env` :
+
+```env
+MAKE_COM_CALENDAR_WEBHOOK=https://hook.eu2.make.com/votre-webhook
+```
+
+Sans cette variable, l'application fonctionne normalement et enregistre un avertissement dans les logs.
+
+### Tests
+
+```bash
+composer run test
+```
+
+## Structure du projet
+
+```text
+app/
+  Http/Controllers/   Contrôleurs (TaskController, ProfileController, Auth)
+  Models/             Modèles Eloquent (Task, User)
+  Services/           CalendarService (intégration Make.com)
+database/
+  migrations/         Migrations des tables users, tasks, task_user, cache, jobs
+public/
+  images/             Logos et ressources graphiques
+  style.css           Feuille de style principale
+  task_add.js         Logique du formulaire d'ajout de tâche
+  account_menu.js     Menu du compte utilisateur
+resources/views/      Vues Blade (welcome, dashboard, task_add, auth, profile)
+routes/web.php        Définition des routes principales
+tests/                Tests Pest (Feature et Unit)
+```
