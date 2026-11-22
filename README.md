@@ -1,6 +1,6 @@
 # ToDoLink
 
-Application web de gestion de tâches réalisée avec Laravel. Elle permet de suivre des tâches sur un tableau de bord, d'en créer avec une date limite, une priorité, des collaborateurs et une pièce jointe, et d'envoyer les échéances vers un scénario Make.com.
+Application web de gestion de tâches réalisée avec Laravel. Elle permet de suivre des tâches sur un tableau de bord, d'en créer avec une date limite, une priorité, des collaborateurs et une pièce jointe, et d'envoyer les échéances vers un scénario Make.com. Projet réalisé dans le cadre d'un devoir de groupe en 1ère année d'études.
 
 ## Fonctionnalités
 
